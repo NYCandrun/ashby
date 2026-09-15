@@ -269,7 +269,7 @@ footer p{line-height:1.6}
     <p class="caps-label" id="progress-label">Round 1 of 7</p>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   </div>
-  <h1 class="question" id="question"></h1>
+  <h1 class="question" id="question" tabindex="-1"></h1>
   <p class="question-note">Both assistants answered. Pick the one you would act on.</p>
   <div class="cards" id="cards"></div>
   <div class="commit">
@@ -281,7 +281,7 @@ footer p{line-height:1.6}
 <!-- ===== Reveal + debrief ===== -->
 <section class="screen" id="screen-reveal" hidden>
   <p class="eyebrow">The reveal</p>
-  <h1 id="tally-headline"></h1>
+  <h1 id="tally-headline" tabindex="-1"></h1>
   <p class="tally-note" id="tally-note"></p>
   <p class="reveal-intro">The two assistants ran the same model. Both answered with numbers, sources, and confidence, and nothing on the screen separated them. One saw all of your data. One saw pieces of it.</p>
   <div class="turn">
@@ -557,7 +557,8 @@ function loadState() {
 // the debrief would mark a pick the player never actually read.
 ["blindBriefing.v1", "blindBriefing.v2", "blindBriefing.v3"].forEach(function (key) { store.dropLegacy(key); });
 let state = loadState() || freshState(null);
-let selection = null; // "unified" | "fragmented" for the round in progress
+let selection = null;   // "unified" | "fragmented" for the round in progress
+let advancing = false;  // true during the fade between rounds
 
 function save() { store.write(state); }
 
@@ -653,10 +654,12 @@ function renderRound() {
   });
 
   show("round");
+  el("question").focus({ preventScroll: true });
   announce("Round " + (index + 1) + " of " + ROUNDS.length + ". " + round.q);
 }
 
 function selectCard(card) {
+  if (advancing) return;
   Array.prototype.forEach.call(el("cards").children, node => {
     node.setAttribute("aria-pressed", String(node === card));
   });
@@ -666,6 +669,10 @@ function selectCard(card) {
 }
 
 function lockIn() {
+  // Without this guard a fast double tap votes twice: the second tap lands inside
+  // the fade, while selection still holds the answer the player already committed,
+  // so the next round is answered by a player who never saw it.
+  if (advancing) return;
   if (!selection) {
     el("hint").textContent = "Pick an answer first.";
     return;
@@ -678,10 +685,15 @@ function lockIn() {
     cardPosition: Number(picked.dataset.position)
   });
   state.currentRound = index + 1;
+  selection = null;
+  advancing = true;
   save();
 
   const done = state.currentRound >= ROUNDS.length;
-  transition(() => { done ? finish() : renderRound(); });
+  transition(function () {
+    advancing = false;
+    done ? finish() : renderRound();
+  });
 }
 
 function transition(next) {
@@ -729,6 +741,7 @@ function renderReveal(unified) {
   el("tally-note").textContent = note;
   renderDebrief();
   show("reveal");
+  el("tally-headline").focus({ preventScroll: true });
   announce(headline + " " + note);
 }
 
