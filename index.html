@@ -284,7 +284,7 @@ footer p{line-height:1.6}
   <p class="tally-note" id="tally-note"></p>
   <p class="reveal-intro">The two assistants ran the same model. Both answered with numbers, sources, and confidence, and nothing on the screen separated them. One saw all of your data. One saw pieces of it.</p>
   <div class="turn">
-    <p>Every wrong answer in this game leads to an action that works. The salary bands go up. The email sends. The managers clear their queue. Nothing errors and nothing warns, and every result looks like progress. The cost shows up weeks later, somewhere else — a search restarts, a budget is overspent, a strong candidate signs elsewhere — and nothing connects it back to the advice. That's what partial data does to a process. It doesn't break it. It makes it fail silently.</p>
+    <p>Every wrong answer in this game leads to an action that works. The equity refreshers go out. The email sends. The managers clear their queue. Nothing errors and nothing warns, and every result looks like progress. The cost shows up weeks later, somewhere else. A search restarts, a budget is overspent, a strong candidate signs elsewhere, and nothing connects it back to the advice. That's what partial data does to a process. It doesn't break it. It makes it fail silently.</p>
   </div>
   <div class="stack-compare">
     <div class="stack-panel">
@@ -319,7 +319,7 @@ footer p{line-height:1.6}
 
   <footer>
     <svg class="logo-svg logo-foot" viewBox="0 0 1001 328" role="img" aria-label="Ashby"><use href="#ashby-logo"/></svg>
-    <p>Meridian is fictional. The failure mode is not: every wrong answer here is what AI produces when a real capability is missing — live pipeline data, candidate history, interview load, feedback, and outcomes, joined in one place.</p>
+    <p>Meridian is fictional. The failure mode is not: every wrong answer here is what AI produces when a real capability is missing. Live pipeline data, candidate history, interview load, feedback, and outcomes, joined in one place.</p>
   </footer>
 </section>
 
@@ -715,10 +715,10 @@ function renderReveal(unified) {
   let headline, note;
   if (unified >= STRONG) {
     headline = "You picked the connected system " + unified + " out of " + SCORED + " times, and some of those were still coin flips.";
-    note = "That's the uncomfortable part \u2014 the quality of an answer was never visible on the screen. At work, you'd never see this screen at all.";
+    note = "That's the uncomfortable part. The quality of an answer was never visible on the screen. At work, you'd never see this screen at all.";
   } else if (unified > BLIND) {
     headline = "You split your votes.";
-    note = "Everyone does \u2014 the answers were equally specific, equally sourced, equally sure. Here's the part that matters: at work, you'd never see this screen.";
+    note = "Everyone does. The answers were equally specific, equally sourced, equally sure. Here's the part that matters: at work, you'd never see this screen.";
   } else {
     headline = "You mostly backed the assistant working from partial data, and its answers deserved it: specific, sourced, confident.";
     note = "At work, you'd never find out. There is no screen like this one.";
@@ -823,7 +823,7 @@ el("startover-btn").addEventListener("click", () => {
   const button = el("startover-btn");
   if (button.dataset.armed !== "yes") {
     button.dataset.armed = "yes";
-    button.textContent = "Tap again to erase progress";
+    button.textContent = "Press again to erase progress";
     return;
   }
   state = freshState(state);
