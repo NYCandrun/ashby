@@ -174,9 +174,16 @@ svg{display:block}
 .hint{font-size:13px;color:var(--textMuted);margin-top:.5rem;min-height:1.4em}
 
 /* ===== Reveal ===== */
-#screen-reveal h1{font-size:clamp(1.75rem,1.4rem + 1.8vw,2.5rem);line-height:1.15;margin-bottom:1rem}
+/* Sized to hold the long branch headlines without swamping the short one. */
+#screen-reveal h1{font-size:clamp(1.625rem,1.35rem + 1.45vw,2.25rem);line-height:1.2;margin-bottom:1rem}
 #screen-reveal h2{font-size:1.25rem;font-weight:600;margin:3rem 0 1rem}
-.reveal-body p+p{margin-top:1em}
+.tally-note{font-size:1.0625em;margin-bottom:1.5rem}
+.reveal-intro{margin-bottom:1.5rem}
+/* The turn: the one place the game explains itself, so it gets the only tinted
+   panel on the screen and the stack lists below read as support for it. */
+.turn{background:var(--bgSelected);border-radius:var(--borderRadiusPanel);padding:1.75rem;margin-bottom:2rem}
+.turn p{font-size:1.0625em;max-width:none}
+@media(max-width:379px){.turn{padding:1.25rem}}
 .stack-compare{display:grid;gap:1rem;margin-top:1.5rem}
 @media(min-width:560px){.stack-compare{grid-template-columns:1fr 1fr}}
 .stack-panel{background:var(--bgSurface);border:1px solid var(--border);border-radius:var(--borderRadius);padding:1.25rem}
@@ -184,6 +191,7 @@ svg{display:block}
 .stack-panel ul{list-style:none;padding:0;font-size:.9375rem;line-height:1.6}
 .stack-panel li{padding-left:1rem;position:relative}
 .stack-panel li::before{content:"·";position:absolute;left:.25rem;color:var(--textMuted)}
+.closing .cl{display:block}
 .closing{
   margin-top:2rem;font-size:clamp(1.25rem,1.1rem + .75vw,1.5rem);font-weight:700;
   color:var(--textHeading);letter-spacing:var(--letterSpacingHeading);line-height:1.4;
@@ -273,9 +281,10 @@ footer p{line-height:1.6}
 <section class="screen" id="screen-reveal" hidden>
   <p class="eyebrow">The reveal</p>
   <h1 id="tally-headline"></h1>
-  <div class="reveal-body">
-    <p id="tally-note"></p>
-    <p>The two assistants ran the same model. They differed in what they could see.</p>
+  <p class="tally-note" id="tally-note"></p>
+  <p class="reveal-intro">The two assistants ran the same model. Both answered with numbers, sources, and confidence, and nothing on the screen separated them. One saw all of your data. One saw pieces of it.</p>
+  <div class="turn">
+    <p>Every wrong answer in this game leads to an action that works. The salary bands go up. The email sends. The managers clear their queue. Nothing errors and nothing warns, and every result looks like progress. The cost shows up weeks later, somewhere else — a search restarts, a budget is overspent, a strong candidate signs elsewhere — and nothing connects it back to the advice. That's what partial data does to a process. It doesn't break it. It makes it fail silently.</p>
   </div>
   <div class="stack-compare">
     <div class="stack-panel">
@@ -299,7 +308,7 @@ footer p{line-height:1.6}
       </ul>
     </div>
   </div>
-  <p class="closing">Same AI. <span class="mark">Different data.</span> That's the whole difference.</p>
+  <p class="closing"><span class="cl">Same AI.</span><span class="cl">Same confidence.</span><span class="cl"><span class="mark">One of them fails silently.</span></span></p>
 
   <h2>Round by round</h2>
   <div class="debrief" id="debrief"></div>
@@ -310,7 +319,7 @@ footer p{line-height:1.6}
 
   <footer>
     <svg class="logo-svg logo-foot" viewBox="0 0 1001 328" role="img" aria-label="Ashby"><use href="#ashby-logo"/></svg>
-    <p>Meridian is fictional. The capabilities behind the unified answers are not: native analytics, AI talent rediscovery, candidate surveys, scheduling load balancing, and quality-of-hire data, all on one data model.</p>
+    <p>Meridian is fictional. The failure mode is not: every wrong answer here is what AI produces when a real capability is missing — live pipeline data, candidate history, interview load, feedback, and outcomes, joined in one place.</p>
   </footer>
 </section>
 
@@ -460,8 +469,8 @@ const ROUNDS = [
 /* ============================================================================
    State and persistence
 ============================================================================ */
-const KEY = "blindBriefing.v1";
-const SCHEMA = 1;
+const KEY = "blindBriefing.v2";
+const SCHEMA = 2;
 const SCORED = ROUNDS.filter(r => r.scored).length;
 
 // localStorage may be unavailable (private mode, quota, locked-down webview).
@@ -489,6 +498,10 @@ const store = (() => {
       memory = null;
       if (!ok) return;
       try { localStorage.removeItem(KEY); } catch (e) {}
+    },
+    dropLegacy(oldKey) {
+      if (!ok) return;
+      try { localStorage.removeItem(oldKey); } catch (e) {}
     }
   };
 })();
@@ -512,6 +525,7 @@ function loadState() {
   return saved;
 }
 
+store.dropLegacy("blindBriefing.v1"); // v1 saves index into the old round order
 let state = loadState() || freshState(null);
 let selection = null; // "unified" | "fragmented" for the round in progress
 
@@ -664,22 +678,22 @@ function finish() {
   renderReveal(unified);
 }
 
-// Branch thresholds scale with the number of scored rounds, keeping the PRD's
-// proportions: a near-sweep, a split, or mostly the assistant that sounded surest.
-const STRONG = SCORED - 1;               // 6 of 7 (4 of 5 when the PRD had 5)
-const BLIND = Math.floor(SCORED * 0.3);  // 2 of 7 (1 of 5)
+// A split vote is the expected and desired outcome here, so the middle branch is
+// deliberately the wide one: only a near-sweep or a near-miss falls outside it.
+const STRONG = SCORED - 1;  // 6 or 7 of 7
+const BLIND = 1;            // 0 or 1 of 7; everything from 2 to 5 lands in the middle
 
 function renderReveal(unified) {
   let headline, note;
   if (unified >= STRONG) {
-    headline = "You picked the same assistant " + unified + " out of " + SCORED + " times.";
-    note = "Here's what it had that the other didn't.";
+    headline = "You picked the connected system " + unified + " out of " + SCORED + " times, and some of those were still coin flips.";
+    note = "That's the uncomfortable part \u2014 the quality of an answer was never visible on the screen. At work, you'd never see this screen at all.";
   } else if (unified > BLIND) {
     headline = "You split your votes.";
-    note = "Both assistants sounded confident. Only one could back it up.";
+    note = "Everyone does \u2014 the answers were equally specific, equally sourced, equally sure. Here's the part that matters: at work, you'd never see this screen.";
   } else {
-    headline = "You mostly picked the assistant that sounded surest.";
-    note = "It was also the one flying blind. Here's what it couldn't see.";
+    headline = "You mostly backed the assistant working from partial data, and its answers deserved it: specific, sourced, confident.";
+    note = "At work, you'd never find out. There is no screen like this one.";
   }
   el("tally-headline").textContent = headline;
   el("tally-note").textContent = note;
@@ -746,7 +760,7 @@ function renderDebrief() {
     blind.className = "blindspot";
     const label = document.createElement("p");
     label.className = "caps-label";
-    label.textContent = "What happened";
+    label.textContent = "What it couldn't see, and what silently went wrong";
     const line = document.createElement("p");
     line.textContent = round.blindspot;
     const capability = document.createElement("p");
