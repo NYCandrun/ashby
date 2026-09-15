@@ -1,5 +1,7 @@
 # PRD: Blind Briefing — a mini game about AI and unified recruiting data
 
+Implementation: [`blind-briefing.html`](blind-briefing.html). Brand: [`ashby-brand-guide.html`](ashby-brand-guide.html).
+
 ## Summary
 
 Blind Briefing is a single-file HTML mini game that makes one argument through play: AI in recruiting is only as good as the data underneath it. The player reads pairs of anonymous AI answers to real recruiting questions and votes for the better one. At the end, the game reveals that one assistant sat on a fragmented stack of point tools while the other sat on one unified system, and shows the player which one they trusted. The game runs entirely in the browser, saves progress on the device with no login, is designed for phones first, and holds up in a desktop Chrome window at any size. Target playtime is 3 to 5 minutes.
