@@ -348,11 +348,11 @@ footer p{line-height:1.6}
      capability  the real product capability the round maps to
 
    Nothing on the surface separates the two. Both sides cite sources, both can
-   span two of them, and in round 6 they cite the same one. The counterintuitive
-   read belongs to the fragmented assistant in rounds 1 to 3 and to the unified
-   one in round 7; the unified assistant urges action and spending in 1, 4 and 7
-   while the fragmented one counsels restraint in 4 and 7. No tone, no stance
-   and no weight of evidence predicts which assistant could see your data.
+   span two of them, and in round 2 they cite the same one. The counterintuitive
+   read belongs to the fragmented assistant in rounds 1, 3 and 4 and to the
+   unified one in round 7; the unified assistant urges action and spending in 1,
+   5 and 7 while the fragmented one counsels restraint in 5 and 7. No tone, no
+   stance and no weight of evidence predicts which assistant could see your data.
 ============================================================================ */
 const ROUNDS = [
   {
@@ -374,6 +374,24 @@ const ROUNDS = [
     },
     "blindspot": "The assistant could see where candidates pile up, but not where they leave. The push works: managers clear the queue, the wait drops, and the pipeline dashboard looks better within a week. The quarter still ends short on engineering hires, because the final interview kept turning away 3 of every 4 people who reached it, and nobody connects the miss to a queue cleanup that looked like a win.",
     "capability": "Analytics that track where candidates exit, not where they pile up"
+  },
+  {
+    "q": "How many open roles do we have right now?",
+    "scored": true,
+    "unified": {
+      "text": "23 as of this morning. Engineering has 14, then sales with four, product with three, and operations with two.",
+      "chips": [
+        "Open roles \u00b7 today"
+      ]
+    },
+    "fragmented": {
+      "text": "25 as of this morning. Engineering has 16, then sales with four, product with three, and operations with two.",
+      "chips": [
+        "Open roles \u00b7 today"
+      ]
+    },
+    "blindspot": "The assistant couldn't see that finance froze two engineering roles yesterday in a different system. The number goes into Monday's leadership deck, nobody questions it, and two recruiters keep sourcing for the frozen roles all week. The error surfaces a month later when finance reconciles the plan, and by then it looks like recruiting can't keep its own numbers straight.",
+    "capability": "Role status and headcount approvals reflected everywhere, immediately"
   },
   {
     "q": "Why are more candidates turning down our offers?",
@@ -455,24 +473,6 @@ const ROUNDS = [
     "capability": "One candidate, many applications, all on one record"
   },
   {
-    "q": "How many open roles do we have right now?",
-    "scored": true,
-    "unified": {
-      "text": "23 as of this morning. Engineering has 14, then sales with four, product with three, and operations with two.",
-      "chips": [
-        "Open roles \u00b7 today"
-      ]
-    },
-    "fragmented": {
-      "text": "25 as of this morning. Engineering has 16, then sales with four, product with three, and operations with two.",
-      "chips": [
-        "Open roles \u00b7 today"
-      ]
-    },
-    "blindspot": "The assistant couldn't see that finance froze two engineering roles yesterday in a different system. The number goes into Monday's leadership deck, nobody questions it, and two recruiters keep sourcing for the frozen roles all week. The error surfaces a month later when finance reconciles the plan, and by then it looks like recruiting can't keep its own numbers straight.",
-    "capability": "Role status and headcount approvals reflected everywhere, immediately"
-  },
-  {
     "q": "Are the engineers we hired through referrals actually performing better?",
     "scored": true,
     "unified": {
@@ -497,8 +497,8 @@ const ROUNDS = [
 /* ============================================================================
    State and persistence
 ============================================================================ */
-const KEY = "blindBriefing.v3";
-const SCHEMA = 3;
+const KEY = "blindBriefing.v4";
+const SCHEMA = 4;
 const SCORED = ROUNDS.filter(r => r.scored).length;
 
 // localStorage may be unavailable (private mode, quota, locked-down webview).
@@ -555,7 +555,7 @@ function loadState() {
 
 // Older saves hold votes cast against answers that have since been rewritten, so
 // the debrief would mark a pick the player never actually read.
-["blindBriefing.v1", "blindBriefing.v2"].forEach(function (key) { store.dropLegacy(key); });
+["blindBriefing.v1", "blindBriefing.v2", "blindBriefing.v3"].forEach(function (key) { store.dropLegacy(key); });
 let state = loadState() || freshState(null);
 let selection = null; // "unified" | "fragmented" for the round in progress
 
