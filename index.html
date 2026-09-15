@@ -327,117 +327,133 @@ footer p{line-height:1.6}
    without touching the logic below.
 
    Each round:
-     q          the question the player asks both assistants
-     scored     true if the round counts toward the reveal tally. Rounds 1 and 2
-                are unscored: both answers are equally good by design, which is
-                what makes the later rounds land.
-     unified    answer from the assistant on one connected system
-     fragmented answer from the assistant on four disconnected tools
-     chips      citation chips, rendered under the answer text as content
-     blindspot  one line for the debrief: what the fragmented stack could not see
-     capability the real product capability the round maps to
+     q           the question the player asks both assistants
+     scored      true if the round counts toward the reveal tally
+     unified     answer from the assistant on one connected system
+     fragmented  answer from the assistant on four disconnected tools
+     chips       citation chips, rendered under the answer text as content
+     blindspot   the debrief line: what the fragmented stack could not see, and
+                 what acting on its answer would have cost
+     capability  the real product capability the round maps to
 
-   Copy rules: 2 to 4 sentences, under 60 words. The fragmented answers are
-   fluent and confident and never sound less intelligent, only less informed.
+   Every round is scored. Each fragmented answer is confident and wrong for a
+   reason that traces back to data it could not reach, never to a weaker model.
 ============================================================================ */
 const ROUNDS = [
   {
-    q: "How many open roles do we have right now?",
-    scored: false,
-    unified: {
-      text: "23 open roles as of this morning. Engineering holds 14 of them, then sales with four, product with three, and G&A with two.",
-      chips: ["Open requisitions · today"]
+    "q": "Where are we losing the most engineering candidates?",
+    "scored": true,
+    "unified": {
+      "text": "The final interview. 48 engineers reached it last quarter and 35 of them left without an offer \u2014 about 1 in 4 got through, while every earlier stage passes at least half. The large group waiting at hiring manager review looks alarming, but nearly all of them move forward eventually.",
+      "chips": [
+        "Stage data \u00b7 Q2",
+        "Engineering \u00b7 48 at final"
+      ]
     },
-    fragmented: {
-      text: "You have 23 roles open right now. The bulk of them sit in engineering at 14, with sales, product, and G&A making up the rest.",
-      chips: []
+    "fragmented": {
+      "text": "Hiring manager review. There are 61 candidates sitting there right now, more than every other stage combined. That's your bottleneck \u2014 I'd push managers to clear the queue this week.",
+      "chips": []
     },
-    blindspot: "Nothing. Both assistants read the same requisition list, and one system is enough to count rows in it.",
-    capability: "Baseline ATS data"
+    "blindspot": "The assistant couldn't tell the difference between candidates who were waiting and candidates who were gone. The 61 people at hiring manager review were stuck, not lost, and the real losses were happening at the final interview. If you followed its advice, you'd speed up a stage that was working and keep losing engineers at the one that wasn't.",
+    "capability": "Analytics that track where candidates exit, not where they pile up"
   },
   {
-    q: "Draft a polite rejection email for a candidate we're passing on.",
-    scored: false,
-    unified: {
-      text: "Hi Dana — thank you for the time you spent with our team. After a lot of discussion we've decided to move forward with another candidate for this role. We'd welcome the chance to talk again when something closer to your strengths opens up. Best, Meridian Talent",
-      chips: []
+    "q": "Why are more candidates turning down our offers?",
+    "scored": true,
+    "unified": {
+      "text": "Speed. The gap between final interview and offer grew from 4 days to almost 12 last quarter, and seven of the nine people who said no mentioned the long wait in the survey we send afterward. Pay came up twice.",
+      "chips": [
+        "Candidate survey \u00b7 Q2",
+        "Offer timing \u00b7 Q2"
+      ]
     },
-    fragmented: {
-      text: "Hi Dana — thanks so much for interviewing with us. We've decided not to move ahead with your application for this role, which was a hard call given how strong the pool was. We'd be glad to stay in touch about future openings. Warmly, Meridian Talent",
-      chips: []
+    "fragmented": {
+      "text": "Pay. The offers that were declined averaged about 12% less than the ones that were accepted, so I'd refresh your salary bands before the next batch goes out.",
+      "chips": []
     },
-    blindspot: "Nothing. This answer is writing, not recall. It is the layer where every AI assistant looks equally capable.",
-    capability: "Generic AI writing, the decorative layer"
+    "blindspot": "The assistant could see the offers but not the survey answers or the interview dates. The declined offers really did pay less, but the people who turned them down said the problem was the wait, not the money. If you followed its advice, you'd raise salaries permanently to fix what was actually a scheduling delay.",
+    "capability": "Candidate feedback and timing joined to every offer"
   },
   {
-    q: "Where in the funnel are we losing the most engineering candidates?",
-    scored: true,
-    unified: {
-      text: "Your steepest drop is recruiter screen to hiring manager screen: 31% pass through, against 58% everywhere else. The onsite is fine at 64%. Twenty-two of the 31 engineering candidates you lost last quarter fell at that one stage.",
-      chips: ["Pipeline analytics · Q2", "Engineering · 141 candidates"]
+    "q": "Who from past applicants should we reach out to again for the new platform PM role?",
+    "scored": true,
+    "unified": {
+      "text": "Marcus Bell. He averaged 4.4 out of 5 across five interviews last spring and only missed out because the role was frozen, so you could close him in weeks rather than months. I'd skip Priya Raman: she looks right on paper, but the panel turned her down in March and the reason is in her file.",
+      "chips": [
+        "Interview scores \u00b7 spring",
+        "Decision notes \u00b7 Mar 14"
+      ]
     },
-    fragmented: {
-      text: "For engineering the drop-off is usually at the onsite, which is where most companies lose their strongest candidates. It's worth tightening the loop and making sure the panel agrees on the bar. Cutting a round often helps too.",
-      chips: []
+    "fragmented": {
+      "text": "Start with Priya Raman. She applied for a PM role last spring and her background in platform tools is the closest match in your records. Candidates that close to the profile are usually worth a second conversation.",
+      "chips": []
     },
-    blindspot: "Stage-by-stage pass-through rates. Its reporting lived in exported spreadsheets, so it had no live funnel to measure and fell back on what is generally true.",
-    capability: "Native analytics, with no spreadsheet export in the loop"
+    "blindspot": "The assistant couldn't see how Priya's interviews went. It knew she applied and what her r\u00e9sum\u00e9 said, but the panel's scores and the reason they said no were in a different tool. If you took its advice, you'd ask your team to reconsider a decision they already made, while the strong candidate you lost to a freeze stays out on the market.",
+    "capability": "Past candidates searched with their full history, not just their r\u00e9sum\u00e9s"
   },
   {
-    q: "Who from past pipelines should we re-engage for the new platform PM role?",
-    scored: true,
-    unified: {
-      text: "Not Priya Raman — the panel declined her for cause last quarter, and the reason is on file. Marcus Bell is your candidate: 4.4 average across five interviews, turned down only because the role froze in March.",
-      chips: ["Interview feedback · Mar 14", "Rejection reason · on file"]
+    "q": "Which interviewers are overloaded this month?",
+    "scored": true,
+    "unified": {
+      "text": "Two people. Ana Duarte is doing nine interviews a week and Tom Okafor eight, against a team average of three. Both of them interview for the platform role, which is why that search keeps falling behind.",
+      "chips": [
+        "Interviewer load \u00b7 this month"
+      ]
     },
-    fragmented: {
-      text: "Start with Priya Raman. She came through for a PM role last spring and her background in platform and developer tooling maps closely to this one. I'd reach out directly, since candidates that close to the profile are worth a second look.",
-      chips: []
+    "fragmented": {
+      "text": "No one \u2014 this month looks healthy. Nobody in the schedule is past your guideline of five interviews a week, so I'd leave the panel assignments as they are.",
+      "chips": []
     },
-    blindspot: "Interview scores and rejection reasons from past pipelines. It could see that Priya applied. It could not see how the panel decided, so it recommended her back.",
-    capability: "AI talent rediscovery across historical candidate data"
+    "blindspot": "The assistant could only see interviews booked through its own scheduling tool. Many interviews were set up as ordinary calendar invites, so the workload it measured genuinely looked fine. Meanwhile your two most senior platform engineers were each losing about a day a week to interviews nobody was tracking.",
+    "capability": "Scheduling that sees every interview, so load can actually be balanced"
   },
   {
-    q: "Why did our offer-accept rate dip last quarter?",
-    scored: true,
-    unified: {
-      text: "It's speed, not comp. Your onsite-to-offer gap went from 4.2 days to 11.6 days last quarter, and seven of the nine candidates who declined named scheduling delays in their survey. Comp came up twice.",
-      chips: ["Candidate survey · Q2", "Offer cycle time · Q2"]
+    "q": "Draft a polite rejection email for a candidate we're passing on.",
+    "scored": true,
+    "unified": {
+      "text": "Hi Dana \u2014 thank you for the time you spent with our team. We've gone with another candidate for the mobile role. This decision only covers that one role: you're still a finalist for the platform opening, and that team is looking forward to your conversation next week. Best, Meridian Talent",
+      "chips": [
+        "Also in process \u00b7 platform role"
+      ]
     },
-    fragmented: {
-      text: "Most likely the market. Hiring picked up across the industry last quarter, so strong candidates are fielding several offers at once. Refreshing your comp bands and moving faster once you decide should bring the rate back up.",
-      chips: []
+    "fragmented": {
+      "text": "Hi Dana \u2014 thanks so much for speaking with us. Unfortunately we've decided not to move forward with your application, and we wish you the very best in your search. We'd be glad to stay in touch about future openings. Warmly, Meridian Talent",
+      "chips": []
     },
-    blindspot: "Candidate survey responses and offer cycle times. Feedback sat in a survey tool and timestamps in a scheduler, and neither was joined to the offer record.",
-    capability: "Candidate experience surveys and analytics on one data model"
+    "blindspot": "The assistant couldn't see Dana's other interview. She's also a finalist for the platform role, which another team tracks in a separate system, so its email tells her she's done at the company one week before her final round. That role has been open for five months, and losing her would start the search over.",
+    "capability": "One record per candidate, across every role they're in"
   },
   {
-    q: "Which interviewers are overloaded this month?",
-    scored: true,
-    unified: {
-      text: "Two people are well past the line. Ana Duarte is at 9.5 interview hours a week and Tom Okafor at 8, against a team average of 3.2. Both sit on the platform loop, which is why it keeps slipping.",
-      chips: ["Interviewer load · this month"]
+    "q": "How many open roles do we have right now?",
+    "scored": true,
+    "unified": {
+      "text": "23 as of this morning. Engineering has 14, sales four, product three, and operations two. Finance froze two more engineering roles yesterday, so I've left those out.",
+      "chips": [
+        "Open roles \u00b7 today"
+      ]
     },
-    fragmented: {
-      text: "Load looks balanced this month. Nothing in the interview schedule stands out as unusually heavy and no one is booked past the five-a-week guidance, so I'd leave the current panel assignments as they are.",
-      chips: []
+    "fragmented": {
+      "text": "You have 25 open roles. Engineering carries most of them at 16, with sales, product, and operations making up the rest.",
+      "chips": []
     },
-    blindspot: "Every interview booked outside its own scheduling tool. Half the platform loop ran on plain calendar invites it never saw, so the load it measured looked fine.",
-    capability: "Scheduling with interviewer load balancing"
+    "blindspot": "The assistant couldn't see the freeze. Finance cut two engineering roles yesterday, but that happened in a different system, so it still counted them as open. If you trusted its number, you'd be hiring for two roles that no longer have budget.",
+    "capability": "Role and budget changes reflected everywhere, immediately"
   },
   {
-    q: "Are the engineers we hired through referrals actually performing better?",
-    scored: true,
-    unified: {
-      text: "Slightly, but not where you'd expect. Referred engineers average 4.3 on the 90-day quality-of-hire survey against 4.1 for everyone else. The real gap is sourced hires at 3.6, which is where your ramp problem actually sits.",
-      chips: ["Quality of hire · 90-day", "By source · last 4 quarters"]
+    "q": "Are the engineers we hired through referrals actually performing better?",
+    "scored": true,
+    "unified": {
+      "text": "Slightly. Referred engineers average 4.3 out of 5 on the 90-day check-in their managers fill out, against 4.1 for everyone else. The bigger problem is the engineers our own recruiters found and approached: they average 3.6, and they're the group struggling to get up to speed.",
+      "chips": [
+        "90-day check-ins \u00b7 last 4 quarters"
+      ]
     },
-    fragmented: {
-      text: "I can't see anything past the offer letter, so I can't measure that directly. Judging by résumés, referred engineers arrived with stronger backgrounds on average, which usually points to stronger performance once they ramp.",
-      chips: []
+    "fragmented": {
+      "text": "Almost certainly. Referred engineers came in with noticeably stronger r\u00e9sum\u00e9s and interview backgrounds, and that usually carries through once people are up and running. I'd raise the referral bonus and lean harder on that channel.",
+      "chips": []
     },
-    blindspot: "Anything after the offer letter. Quality-of-hire data lived in other systems and was never tied back to the source of the hire.",
-    capability: "Quality-of-hire data captured close to the point of hire"
+    "blindspot": "The assistant couldn't see anything that happened after people were hired. It judged the question on the r\u00e9sum\u00e9s hires arrived with, and stronger r\u00e9sum\u00e9s looked like proof of stronger performance. If you followed its advice, you'd spend more on referral bonuses while the group that's actually struggling, the people your recruiters found themselves, stayed invisible.",
+    "capability": "How hires turn out, tied back to where they came from"
   }
 ];
 
@@ -648,12 +664,17 @@ function finish() {
   renderReveal(unified);
 }
 
+// Branch thresholds scale with the number of scored rounds, keeping the PRD's
+// proportions: a near-sweep, a split, or mostly the assistant that sounded surest.
+const STRONG = SCORED - 1;               // 6 of 7 (4 of 5 when the PRD had 5)
+const BLIND = Math.floor(SCORED * 0.3);  // 2 of 7 (1 of 5)
+
 function renderReveal(unified) {
   let headline, note;
-  if (unified >= 4) {
+  if (unified >= STRONG) {
     headline = "You picked the same assistant " + unified + " out of " + SCORED + " times.";
     note = "Here's what it had that the other didn't.";
-  } else if (unified >= 2) {
+  } else if (unified > BLIND) {
     headline = "You split your votes.";
     note = "Both assistants sounded confident. Only one could back it up.";
   } else {
@@ -725,7 +746,7 @@ function renderDebrief() {
     blind.className = "blindspot";
     const label = document.createElement("p");
     label.className = "caps-label";
-    label.textContent = "What the fragmented stack couldn't see";
+    label.textContent = "What happened";
     const line = document.createElement("p");
     line.textContent = round.blindspot;
     const capability = document.createElement("p");
