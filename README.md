@@ -1,6 +1,6 @@
 # PRD: Blind Briefing — a mini game about AI and unified recruiting data
 
-Implementation: [`blind-briefing.html`](blind-briefing.html). Brand: [`ashby-brand-guide.html`](ashby-brand-guide.html).
+Implementation: [`index.html`](index.html) — served at the site root by GitHub Pages. Brand: [`ashby-brand-guide.html`](ashby-brand-guide.html).
 
 ## Summary
 
